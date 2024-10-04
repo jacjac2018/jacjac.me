@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jac Jac's Personal Website</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to Jac Jac's World!</h1>
+    </header>
+
+    <main>
+        <section id="drawing-board">
+            <h2>Drawing Board</h2>
+            <canvas id="canvas"></canvas>
+            <div id="controls">
+                <input type="color" id="color-picker">
+                <select id="shape-selector">
+                    <option value="freehand">Freehand</option>
+                    <option value="line">Line</option>
+                    <option value="rectangle">Rectangle</option>
+                    <option value="circle">Circle</option>
+                </select>
+                <input type="text" id="text-input" placeholder="Enter text">
+                <input type="number" id="font-size" min="8" max="72" value="16">
+                <select id="font-family">
+                    <option value="Arial">Arial</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                </select>
+                <button id="clear-canvas">Clear Canvas</button>
+            </div>
+        </section>
+
+        <section id="chatbot">
+            <h2>Chat with Jac Jac</h2>
+            <div id="chat-messages"></div>
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-message">Send</button>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
