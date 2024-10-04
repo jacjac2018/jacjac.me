@@ -1,0 +1,78 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local MOVE_SPEED = 10 -- 调整移动速度
+
+local function moveCharacter(player, deltaTime)
+    local character = player.Character
+    if not character then return end
+    
+    local humanoid = character:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    
+    local moveDirection = Vector3.new(0, 0, 0)
+    
+    -- 检测方向键输入
+    if player:GetAttribute("MoveForward") then
+        moveDirection = moveDirection + character.HumanoidRootPart.CFrame.LookVector
+    end
+    if player:GetAttribute("MoveBackward") then
+        moveDirection = moveDirection - character.HumanoidRootPart.CFrame.LookVector
+    end
+    if player:GetAttribute("MoveLeft") then
+        moveDirection = moveDirection - character.HumanoidRootPart.CFrame.RightVector
+    end
+    if player:GetAttribute("MoveRight") then
+        moveDirection = moveDirection + character.HumanoidRootPart.CFrame.RightVector
+    end
+    
+    moveDirection = moveDirection.Unit * MOVE_SPEED * deltaTime
+    rootPart.CFrame = rootPart.CFrame + moveDirection
+end
+
+-- 设置输入处理
+local function setupInputHandling(player)
+    local function updateMoveState(actionName, inputState)
+        player:SetAttribute(actionName, inputState == Enum.UserInputState.Begin)
+    end
+    
+    player.CharacterAdded:Connect(function(character)
+        local UserInputService = game:GetService("UserInputService")
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if input.KeyCode == Enum.KeyCode.Up then
+        updateMoveState("MoveForward", Enum.UserInputState.Begin)
+    elseif input.KeyCode == Enum.KeyCode.Down then
+        updateMoveState("MoveBackward", Enum.UserInputState.Begin)
+    elseif input.KeyCode == Enum.KeyCode.Left then
+        updateMoveState("MoveLeft", Enum.UserInputState.Begin)
+    elseif input.KeyCode == Enum.KeyCode.Right then
+        updateMoveState("MoveRight", Enum.UserInputState.Begin)
+    end
+        end)
+        
+        UserInputService.InputEnded:Connect(function(input, gameProcessed)
+            if input.KeyCode == Enum.KeyCode.W then
+                updateMoveState("MoveForward", Enum.UserInputState.End)
+            elseif input.KeyCode == Enum.KeyCode.S then
+                updateMoveState("MoveBackward", Enum.UserInputState.End)
+            elseif input.KeyCode == Enum.KeyCode.A then
+                updateMoveState("MoveLeft", Enum.UserInputState.End)
+            elseif input.KeyCode == Enum.KeyCode.D then
+                updateMoveState("MoveRight", Enum.UserInputState.End)
+            end
+        end)
+    end)
+end
+
+-- 为每个玩家设置输入处理
+Players.PlayerAdded:Connect(setupInputHandling)
+
+-- 更新角色移动
+RunService.Heartbeat:Connect(function(deltaTime)
+    for _, player in ipairs(Players:GetPlayers()) do
+        moveCharacter(player, deltaTime)
+    end
+end)
