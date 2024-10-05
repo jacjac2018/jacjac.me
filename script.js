@@ -1,16 +1,69 @@
 // Drawing Board
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const colorPicker = document.getElementById('color-picker');
 const shapeSelector = document.getElementById('shape-selector');
 const textInput = document.getElementById('text-input');
 const fontSize = document.getElementById('font-size');
 const fontFamily = document.getElementById('font-family');
 const clearCanvas = document.getElementById('clear-canvas');
+const strokeWidth = document.getElementById('stroke-width');
+const colorPalette = document.getElementById('color-palette');
+const colorAdjust = document.getElementById('color-adjust');
+
+let currentColor = '#000000';
 
 // Set canvas size
-canvas.width = 500;
-canvas.height = 300;
+function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetWidth * 0.6;
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Generate color palette
+const colors = [
+    '#000000', '#808080', '#C0C0C0', '#FFFFFF', '#800000', '#FF0000', '#808000', '#FFFF00',
+    '#008000', '#00FF00', '#008080', '#00FFFF', '#000080', '#0000FF', '#800080', '#FF00FF',
+    '#804000', '#FF8000', '#408000', '#80FF00', '#004080', '#0080FF', '#400080', '#8000FF',
+    '#804040', '#FF8080', '#408040', '#80FF80', '#004080', '#0080FF', '#400080', '#8000FF',
+    '#804000', '#FF8000', '#408000', '#80FF00', '#004080', '#0080FF', '#400080', '#8000FF',
+    '#400000', '#800000', '#400040', '#800080', '#004000', '#008000', '#004040', '#008080'
+];
+
+colors.forEach(color => {
+    const swatch = document.createElement('div');
+    swatch.className = 'color-swatch';
+    swatch.style.backgroundColor = color;
+    swatch.addEventListener('click', () => {
+        currentColor = color;
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+        swatch.classList.add('selected');
+    });
+    colorPalette.appendChild(swatch);
+});
+
+colorAdjust.addEventListener('input', () => {
+    const rgb = hexToRgb(currentColor);
+    const factor = colorAdjust.value / 50;
+    const adjustedRgb = rgb.map(value => Math.min(255, Math.max(0, Math.round(value * factor))));
+    currentColor = rgbToHex(adjustedRgb);
+    document.querySelector('.color-swatch.selected').style.backgroundColor = currentColor;
+});
+
+function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return [r, g, b];
+}
+
+function rgbToHex(rgb) {
+    return '#' + rgb.map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    }).join('');
+}
 
 let isDrawing = false;
 let lastX = 0;
@@ -33,9 +86,9 @@ function startDrawing(e) {
 function draw(e) {
     if (!isDrawing) return;
 
-    ctx.strokeStyle = colorPicker.value;
-    ctx.fillStyle = colorPicker.value;
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = currentColor;
+    ctx.fillStyle = currentColor;
+    ctx.lineWidth = strokeWidth.value;
     ctx.lineCap = 'round';
 
     const shape = shapeSelector.value;
@@ -73,7 +126,7 @@ function stopDrawing() {
 textInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         ctx.font = `${fontSize.value}px ${fontFamily.value}`;
-        ctx.fillStyle = colorPicker.value;
+        ctx.fillStyle = currentColor;
         ctx.fillText(textInput.value, lastX, lastY);
         textInput.value = '';
     }

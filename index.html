@@ -16,13 +16,15 @@
             <h2>Drawing Board</h2>
             <canvas id="canvas"></canvas>
             <div id="controls">
-                <input type="color" id="color-picker">
+                <div id="color-palette"></div>
+                <input type="range" id="color-adjust" min="0" max="100" value="50">
                 <select id="shape-selector">
                     <option value="freehand">Freehand</option>
                     <option value="line">Line</option>
                     <option value="rectangle">Rectangle</option>
                     <option value="circle">Circle</option>
                 </select>
+                <input type="range" id="stroke-width" min="1" max="20" value="2">
                 <input type="text" id="text-input" placeholder="Enter text">
                 <input type="number" id="font-size" min="8" max="72" value="16">
                 <select id="font-family">
@@ -46,3 +48,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+

@@ -15,6 +15,12 @@ header {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
 main {
     display: flex;
     flex-wrap: wrap;
@@ -45,6 +51,8 @@ h2 {
     display: block;
     margin-bottom: 1rem;
     border-radius: 5px;
+    width: 100%;
+    height: auto;
 }
 
 #controls {
@@ -54,11 +62,33 @@ h2 {
     margin-bottom: 1rem;
 }
 
-#controls > * {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
+#color-palette {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.color-swatch.selected {
+    border-color: #000;
+}
+
+#color-adjust {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#stroke-width {
+    width: 100%;
+    margin-bottom: 10px;
 }
 
 #chat-messages {
