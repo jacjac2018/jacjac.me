@@ -1,7 +1,7 @@
 let girls = [
     { "name": "Adelaide Chan", "photo": "Images/1.jpg" },
     { "name": "Alexis Chan", "photo": "Images/2.jpg" },
-    { "name": "Chan Chin (Kiwi)", "photo": "Images/3.jpg" },
+    { "name": "Chan Chin (Kiwie)", "photo": "Images/3.jpg" },
     { "name": "Chan Doria", "photo": "Images/4.jpg" },
     { "name": "Chloe Chan", "photo": "Images/5.jpg" },
     { "name": "Atarah Cheng", "photo": "Images/6.jpg" },
