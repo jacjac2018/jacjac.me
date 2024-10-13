@@ -14,12 +14,21 @@ let currentColor = '#000000';
 
 // Set canvas size
 function resizeCanvas() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetWidth * 0.6;
+    const parent = canvas.parentElement;
+    canvas.width = parent.clientWidth * 0.95;
+    canvas.height = canvas.width * 0.6;
+    redrawCanvas();
 }
 
+function redrawCanvas() {
+    // Redraw any existing content on the canvas after resizing
+    // This is just a placeholder - you'll need to implement this based on your needs
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+window.addEventListener('load', resizeCanvas);
 window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
 
 // Generate color palette
 const colors = [

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Guess the Girl's Name</title>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Guess the Girl's Name</h1>
+        <div id="score">Score: <span id="current-score">0</span> / <span id="total-questions">0</span></div>
+        <div id="progress">Question <span id="current-question">1</span> of <span id="total-girls">0</span></div>
+        <div id="total-time">Total time used: 0 seconds</div>
+        <img id="girl-photo" src="" alt="Girl's Photo">
+        <div id="name-options"></div>
+        <button id="next-question" style="display: none;">Next Question</button>
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="timer">Time: <span id="time-left">10</span>s</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
