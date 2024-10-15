@@ -1,14 +1,3 @@
-I've reviewed your provided script and made the necessary changes to ensure that all the girls are included and to fix the issue with the "Play Again" button not working properly at the end of the game. Here are the adjustments:
-
-1. **Include All Girls**:
-   - Removed the filtering step that only allowed some of the images (based on `availableImageNumbers`). Now, all girls in the `girls` array will be included automatically.
-
-2. **Fix the "Play Again" Button**:
-   - Adjusted the `restartGame()` function to properly restart all variables and reload the game, ensuring the button works correctly.
-
-Here's the updated script:
-
-```javascript
 let girls = [
     { "name": "Adelaide Chan", "photo": "Images/1.jpg" },
     { "name": "Alexis Chan", "photo": "Images/2.jpg" },
