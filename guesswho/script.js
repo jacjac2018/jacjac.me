@@ -300,25 +300,26 @@ function checkReviewAnswer(selectedName, correctName) {
         }
     });
 
-    if (selectedName === correctName) {
-        wrongAnswers.splice(currentQuestionIndex, 1);
-    } else {
-        currentQuestionIndex++;
+    if (selectedName !== correctName) {
+        const selectedButton = Array.from(buttons).find(button => button.textContent === selectedName);
+        selectedButton.style.backgroundColor = '#f44336';
     }
 
-    setTimeout(loadWrongAnswer, 1500);
+    setTimeout(() => {
+        currentQuestionIndex++;
+        loadWrongAnswer();
+    }, 1500);
 }
 
 function showReviewSummary() {
     const gameContainer = document.getElementById('game-container');
-    const totalReviewed = wrongAnswers.length;
-    const correctReviewed = totalQuestions - wrongAnswers.length;
+    const correctReviewed = currentScore;
     const percentage = (correctReviewed / totalQuestions) * 100;
     
     let encouragement = "";
     if (wrongAnswers.length === 0) {
         encouragement = "Fantastic job! You've corrected all your mistakes. Keep up the great work!";
-    } else if (wrongAnswers.length <= totalReviewed / 2) {
+    } else if (wrongAnswers.length <= totalQuestions / 2) {
         encouragement = "Great improvement! You're making excellent progress. A little more practice and you'll know them all!";
     } else {
         encouragement = "Good effort! Remember, learning takes time. Keep practicing and you'll see improvement!";
@@ -339,8 +340,27 @@ function restartGame() {
     totalTimeUsed = 0;
     wrongAnswers = []; // Reset wrongAnswers
     availableGirls = shuffleArray([...girls]); // Shuffle all girls for a fresh start
+    totalQuestions = availableGirls.length;
     updateScore();
     loadGame();
+    
+    // Reset the game container to its initial state
+    const gameContainer = document.getElementById('game-container');
+    gameContainer.innerHTML = `
+        <h1>Guess the Girl's Name</h1>
+        <div id="score">Score: <span id="current-score">0</span> / <span id="total-questions">0</span></div>
+        <div id="progress">Question <span id="current-question">1</span> of <span id="total-girls">0</span></div>
+        <div id="total-time">Total time used: 0 seconds</div>
+        <img id="girl-photo" src="" alt="Girl's Photo">
+        <div id="name-options"></div>
+        <button id="next-question" style="display: none;">Next Question</button>
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="timer">Time: <span id="time-left">10</span>s</div>
+    `;
+    
+    updateTotalGirls();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
