@@ -57,7 +57,7 @@ const timePerQuestion = 10000; // 10 seconds per question in milliseconds
 let totalTimeUsed = 0;
 let wrongAnswers = [];
 
-async function initAvailableGirls() {
+function initAvailableGirls() {
     availableGirls = [...girls]; // Include all girls
     availableGirls = shuffleArray(availableGirls);
 
@@ -84,8 +84,8 @@ function updateTotalGirls() {
 
 function updateScore() {
     document.getElementById('current-score').textContent = currentScore;
-    document.getElementById('total-questions').textContent = currentQuestionIndex;
-    document.getElementById('total-time').textContent = `Total time used: ${totalTimeUsed} seconds`;
+    document.getElementById('total-questions').textContent = totalQuestions;
+    document.getElementById('total-time').textContent = `Total time used: ${(totalTimeUsed / 1000).toFixed(2)} seconds`;
 }
 
 function updateProgress() {
@@ -95,6 +95,7 @@ function updateProgress() {
 }
 
 function loadGame() {
+    wrongAnswers = []; // Reset wrongAnswers at the start of each game
     updateProgress();
     const currentGirl = availableGirls[currentQuestionIndex];
 
@@ -282,9 +283,12 @@ function restartGame() {
     currentScore = 0;
     currentQuestionIndex = 0;
     totalTimeUsed = 0;
+    wrongAnswers = []; // Reset wrongAnswers
     availableGirls = shuffleArray([...girls]); // Shuffle all girls for a fresh start
     updateScore();
     loadGame();
 }
 
-initAvailable
+document.addEventListener('DOMContentLoaded', () => {
+    initAvailableGirls();
+});
