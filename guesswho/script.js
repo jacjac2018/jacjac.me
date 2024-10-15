@@ -248,24 +248,89 @@ function createFireworks() {
 function reviewWrongAnswers() {
     if (wrongAnswers.length === 0) {
         alert("Congratulations! You didn't get any answers wrong.");
+        endGame();
         return;
     }
 
+    currentQuestionIndex = 0;
+    loadWrongAnswer();
+}
+
+function loadWrongAnswer() {
+    if (currentQuestionIndex >= wrongAnswers.length) {
+        showReviewSummary();
+        return;
+    }
+
+    const currentWrong = wrongAnswers[currentQuestionIndex];
     const gameContainer = document.getElementById('game-container');
-    let reviewHTML = '<h2>Review Wrong Answers</h2>';
     
-    wrongAnswers.forEach((answer, index) => {
-        reviewHTML += `
-            <div class="review-item">
-                <img src="${answer.photo}" alt="${answer.correct}" style="width: 100px; height: 100px;">
-                <p>Correct: ${answer.correct}</p>
-                <p>Your answer: ${answer.selected}</p>
-            </div>
-        `;
+    gameContainer.innerHTML = `
+        <h2>Review Wrong Answers</h2>
+        <p>Question ${currentQuestionIndex + 1} of ${wrongAnswers.length}</p>
+        <img src="${currentWrong.photo}" alt="${currentWrong.correct}" style="width: 200px; height: 200px; object-fit: cover;">
+        <p>Your previous answer: ${currentWrong.selected}</p>
+        <div id="name-options"></div>
+    `;
+
+    const options = [currentWrong.correct];
+    while (options.length < 4) {
+        const randomGirl = girls[Math.floor(Math.random() * girls.length)];
+        if (!options.includes(randomGirl.name)) {
+            options.push(randomGirl.name);
+        }
+    }
+    options.sort(() => Math.random() - 0.5);
+
+    const nameOptionsDiv = document.getElementById('name-options');
+    options.forEach(name => {
+        const button = document.createElement('button');
+        button.textContent = name;
+        button.onclick = () => checkReviewAnswer(name, currentWrong.correct);
+        nameOptionsDiv.appendChild(button);
     });
+}
+
+function checkReviewAnswer(selectedName, correctName) {
+    const buttons = document.querySelectorAll('#name-options button');
+    buttons.forEach(button => {
+        button.disabled = true;
+        if (button.textContent === correctName) {
+            button.style.backgroundColor = '#4CAF50';
+        }
+    });
+
+    if (selectedName === correctName) {
+        wrongAnswers.splice(currentQuestionIndex, 1);
+    } else {
+        currentQuestionIndex++;
+    }
+
+    setTimeout(loadWrongAnswer, 1500);
+}
+
+function showReviewSummary() {
+    const gameContainer = document.getElementById('game-container');
+    const totalReviewed = wrongAnswers.length;
+    const correctReviewed = totalQuestions - wrongAnswers.length;
+    const percentage = (correctReviewed / totalQuestions) * 100;
     
-    reviewHTML += '<button onclick="endGame()">Back to Results</button>';
-    gameContainer.innerHTML = reviewHTML;
+    let encouragement = "";
+    if (wrongAnswers.length === 0) {
+        encouragement = "Fantastic job! You've corrected all your mistakes. Keep up the great work!";
+    } else if (wrongAnswers.length <= totalReviewed / 2) {
+        encouragement = "Great improvement! You're making excellent progress. A little more practice and you'll know them all!";
+    } else {
+        encouragement = "Good effort! Remember, learning takes time. Keep practicing and you'll see improvement!";
+    }
+
+    gameContainer.innerHTML = `
+        <h2>Review Summary</h2>
+        <p>You've correctly identified ${correctReviewed} out of ${totalQuestions} girls.</p>
+        <p>${encouragement}</p>
+        <button onclick="reviewWrongAnswers()" style="background-color: #FFA500; margin-right: 10px;">Review Again</button>
+        <button onclick="restartGame()" style="background-color: #4CAF50;">Play Full Game</button>
+    `;
 }
 
 function restartGame() {
