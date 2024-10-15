@@ -84,7 +84,6 @@ function updateProgress() {
 }
 
 function loadGame() {
-    wrongAnswers = []; // Reset wrongAnswers at the start of each game
     updateProgress();
     const currentGirl = availableGirls[currentQuestionIndex];
 
@@ -173,7 +172,6 @@ function checkAnswer(selectedName, correctName) {
         selectedButton.style.backgroundColor = '#f44336';
         wrongAnswers.push({
             correct: correctName,
-            selected: selectedName,
             photo: availableGirls[currentQuestionIndex].photo
         });
     }
@@ -191,147 +189,55 @@ function nextQuestion() {
     }
 }
 
-function getPerformanceComment(percentage) {
-    if (percentage === 100) {
-        return "Perfect score! You're an absolute expert on your classmates' names!";
-    } else if (percentage >= 90) {
-        return "Excellent! You remember most of the girls' names. You're a true class expert!";
-    } else if (percentage >= 80) {
-        return "Great job! You have a very good memory of the girls in your class.";
-    } else if (percentage >= 70) {
-        return "Good work! You remember quite a few of the girls' names.";
-    } else if (percentage >= 60) {
-        return "Not bad! You're familiar with many of the girls in your class.";
-    } else if (percentage >= 50) {
-        return "You're getting there! Keep practicing to improve your memory of the class.";
-    } else {
-        return "There's room for improvement. Don't worry, with more practice you'll get better at remembering names!";
-    }
-}
-
 function endGame() {
     const percentage = (currentScore / totalQuestions) * 100;
     const comment = getPerformanceComment(percentage);
     const gameContainer = document.getElementById('game-container');
-    
-    let celebrationEffect = '';
-    if (percentage === 100) {
-        celebrationEffect = '<div id="fireworks"></div>';
+
+    let reviewButton = "";
+    if (wrongAnswers.length > 0) {
+        reviewButton = `<button onclick="reviewWrongAnswers()" style="background-color: #FFA500; margin-right: 10px;">Review Wrong Answers</button>`;
     }
-    
+
     gameContainer.innerHTML = `
-        ${celebrationEffect}
+        <div id="celebration-container"></div>
         <h1>Quiz Completed!</h1>
         <p>Your final score: ${currentScore} / ${totalQuestions}</p>
         <p>Total time used: ${(totalTimeUsed / 1000).toFixed(2)} seconds</p>
         <p>${comment}</p>
-        <button onclick="reviewWrongAnswers()" style="background-color: #FFA500; margin-right: 10px;">Review Wrong Answers</button>
+        ${reviewButton}
         <button onclick="restartGame()" style="background-color: #4CAF50;">Play Again</button>
     `;
-    
+
     if (percentage === 100) {
         createFireworks();
     }
 }
 
 function createFireworks() {
-    const fireworks = document.getElementById('fireworks');
-    for (let i = 0; i < 50; i++) {
+    const celebrationContainer = document.getElementById('celebration-container');
+    celebrationContainer.innerHTML = '';
+    for (let i = 0; i < 30; i++) {
         const firework = document.createElement('div');
         firework.className = 'firework';
         firework.style.left = `${Math.random() * 100}%`;
         firework.style.animationDelay = `${Math.random() * 2}s`;
-        fireworks.appendChild(firework);
+        celebrationContainer.appendChild(firework);
     }
 }
 
 function reviewWrongAnswers() {
     if (wrongAnswers.length === 0) {
         alert("Congratulations! You didn't get any answers wrong.");
-        endGame();
+        restartGame();
         return;
     }
 
+    availableGirls = [...wrongAnswers]; // Set availableGirls to wrongAnswers for review
+    wrongAnswers = []; // Clear wrong answers list for review session
     currentQuestionIndex = 0;
-    loadWrongAnswer();
-}
-
-function loadWrongAnswer() {
-    if (currentQuestionIndex >= wrongAnswers.length) {
-        showReviewSummary();
-        return;
-    }
-
-    const currentWrong = wrongAnswers[currentQuestionIndex];
-    const gameContainer = document.getElementById('game-container');
-    
-    gameContainer.innerHTML = `
-        <h2>Review Wrong Answers</h2>
-        <p>Question ${currentQuestionIndex + 1} of ${wrongAnswers.length}</p>
-        <img src="${currentWrong.photo}" alt="${currentWrong.correct}" style="width: 200px; height: 200px; object-fit: cover;">
-        <p>Your previous answer: ${currentWrong.selected}</p>
-        <div id="name-options"></div>
-    `;
-
-    const options = [currentWrong.correct];
-    while (options.length < 4) {
-        const randomGirl = girls[Math.floor(Math.random() * girls.length)];
-        if (!options.includes(randomGirl.name)) {
-            options.push(randomGirl.name);
-        }
-    }
-    options.sort(() => Math.random() - 0.5);
-
-    const nameOptionsDiv = document.getElementById('name-options');
-    options.forEach(name => {
-        const button = document.createElement('button');
-        button.textContent = name;
-        button.onclick = () => checkReviewAnswer(name, currentWrong.correct);
-        nameOptionsDiv.appendChild(button);
-    });
-}
-
-function checkReviewAnswer(selectedName, correctName) {
-    const buttons = document.querySelectorAll('#name-options button');
-    buttons.forEach(button => {
-        button.disabled = true;
-        if (button.textContent === correctName) {
-            button.style.backgroundColor = '#4CAF50';
-        }
-    });
-
-    if (selectedName !== correctName) {
-        const selectedButton = Array.from(buttons).find(button => button.textContent === selectedName);
-        selectedButton.style.backgroundColor = '#f44336';
-    }
-
-    setTimeout(() => {
-        currentQuestionIndex++;
-        loadWrongAnswer();
-    }, 1500);
-}
-
-function showReviewSummary() {
-    const gameContainer = document.getElementById('game-container');
-    const correctReviewed = currentScore;
-    const percentage = (correctReviewed / totalQuestions) * 100;
-    
-    let encouragement = "";
-    if (wrongAnswers.length === 0) {
-        encouragement = "Fantastic job! You've corrected all your mistakes. Keep up the great work!";
-    } else if (wrongAnswers.length <= totalQuestions / 2) {
-        encouragement = "Great improvement! You're making excellent progress. A little more practice and you'll know them all!";
-    } else {
-        encouragement = "Good effort! Remember, learning takes time. Keep practicing and you'll see improvement!";
-    }
-
-    gameContainer.innerHTML = `
-        <h2>Review Summary</h2>
-        <p>You've correctly identified ${correctReviewed} out of ${totalQuestions} girls.</p>
-        <p>${encouragement}</p>
-        <button onclick="reviewWrongAnswers()" style="background-color: #FFA500; margin-right: 10px;">Review Again</button>
-        <button onclick="restartGame()" style="background-color: #4CAF50;">Play Full Game</button>
-    `;
+    totalQuestions = availableGirls.length;
+    loadGame();
 }
 
 function restartGame() {
@@ -343,24 +249,6 @@ function restartGame() {
     totalQuestions = availableGirls.length;
     updateScore();
     loadGame();
-    
-    // Reset the game container to its initial state
-    const gameContainer = document.getElementById('game-container');
-    gameContainer.innerHTML = `
-        <h1>Guess the Girl's Name</h1>
-        <div id="score">Score: <span id="current-score">0</span> / <span id="total-questions">0</span></div>
-        <div id="progress">Question <span id="current-question">1</span> of <span id="total-girls">0</span></div>
-        <div id="total-time">Total time used: 0 seconds</div>
-        <img id="girl-photo" src="" alt="Girl's Photo">
-        <div id="name-options"></div>
-        <button id="next-question" style="display: none;">Next Question</button>
-        <div id="progress-bar-container">
-            <div id="progress-bar"></div>
-        </div>
-        <div id="timer">Time: <span id="time-left">10</span>s</div>
-    `;
-    
-    updateTotalGirls();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
