@@ -1,190 +1,215 @@
-// Drawing Board
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const shapeSelector = document.getElementById('shape-selector');
-const textInput = document.getElementById('text-input');
-const fontSize = document.getElementById('font-size');
-const fontFamily = document.getElementById('font-family');
-const clearCanvas = document.getElementById('clear-canvas');
-const strokeWidth = document.getElementById('stroke-width');
-const colorPalette = document.getElementById('color-palette');
-const colorAdjust = document.getElementById('color-adjust');
-
-let currentColor = '#000000';
-
-// Set canvas size
-function resizeCanvas() {
-    const parent = canvas.parentElement;
-    canvas.width = parent.clientWidth * 0.95;
-    canvas.height = canvas.width * 0.6;
-    redrawCanvas();
-}
-
-function redrawCanvas() {
-    // Redraw any existing content on the canvas after resizing
-    // This is just a placeholder - you'll need to implement this based on your needs
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-window.addEventListener('load', resizeCanvas);
-window.addEventListener('resize', resizeCanvas);
-
-// Generate color palette
-const colors = [
-    '#000000', '#808080', '#C0C0C0', '#FFFFFF', '#800000', '#FF0000', '#808000', '#FFFF00',
-    '#008000', '#00FF00', '#008080', '#00FFFF', '#000080', '#0000FF', '#800080', '#FF00FF',
-    '#804000', '#FF8000', '#408000', '#80FF00', '#004080', '#0080FF', '#400080', '#8000FF',
-    '#804040', '#FF8080', '#408040', '#80FF80', '#004080', '#0080FF', '#400080', '#8000FF',
-    '#804000', '#FF8000', '#408000', '#80FF00', '#004080', '#0080FF', '#400080', '#8000FF',
-    '#400000', '#800000', '#400040', '#800080', '#004000', '#008000', '#004040', '#008080'
+let girls = [
+    { "name": "Adelaide Chan", "photo": "Images/1.jpg" },
+    { "name": "Alexis Chan", "photo": "Images/2.jpg" },
+    { "name": "Chan Chin (Kiwi)", "photo": "Images/3.jpg" },
+    { "name": "Chan Doria", "photo": "Images/4.jpg" },
+    { "name": "Chloe Chan", "photo": "Images/5.jpg" },
+    { "name": "Atarah Cheng", "photo": "Images/6.jpg" },
+    { "name": "Zoey Cheng", "photo": "Images/7.jpg" },
+    { "name": "Cheng Tsz Kiu (Alyssa)", "photo": "Images/8.jpg" },
+    { "name": "Cheng Yuen Wing (Karlie)", "photo": "Images/9.jpg" },
+    { "name": "Mian Cheung", "photo": "Images/10.jpg" },
+    { "name": "Sophie Chiu", "photo": "Images/11.jpg" },
+    { "name": "Fong Hay Lam (Kayla)", "photo": "Images/12.jpg" },
+    { "name": "Glory Fong", "photo": "Images/13.jpg" },
+    { "name": "Chloe Fung", "photo": "Images/14.jpg" },
+    { "name": "Hau Yi Ting (Arie)", "photo": "Images/15.jpg" },
+    { "name": "Kot Wing Lam (Sheena)", "photo": "Images/16.jpg" },
+    { "name": "Hailey Lam", "photo": "Images/17.jpg" },
+    { "name": "Meagan Lam", "photo": "Images/18.jpg" },
+    { "name": "Lam Yu Tsit (Gianna)", "photo": "Images/19.jpg" },
+    { "name": "Lau Cheuk Yau (Tiana)", "photo": "Images/20.jpg" },
+    { "name": "Lau Sin Yee (Brielle)", "photo": "Images/21.jpg" },
+    { "name": "Jacqueline Leung", "photo": "Images/22.jpg" },
+    { "name": "Juno Li", "photo": "Images/23.jpg" },
+    { "name": "Lo Chin Yu (Charlie)", "photo": "Images/24.jpg" },
+    { "name": "Karley Lo", "photo": "Images/25.jpg" },
+    { "name": "Sin Yan Yin (Hanna)", "photo": "Images/26.jpg" },
+    { "name": "Valerie Tang", "photo": "Images/27.jpg" },
+    { "name": "To Chin Yuet (Camila)", "photo": "Images/28.jpg" },
+    { "name": "Tsang Po Che (Porsche)", "photo": "Images/29.jpg" },
+    { "name": "Tsui Sum Wing (Acadia)", "photo": "Images/30.jpg" },
+    { "name": "Adelyn Wong", "photo": "Images/31.jpg" },
+    { "name": "Hannah Wong", "photo": "Images/32.jpg" },
+    { "name": "Jeannie Wong", "photo": "Images/33.jpg" },
+    { "name": "Wong Wing Lam", "photo": "Images/34.jpg" },
+    { "name": "Jessalyn Yim", "photo": "Images/35.jpg" },
+    { "name": "Yip Pui Lam", "photo": "Images/36.jpg" }
 ];
 
-colors.forEach(color => {
-    const swatch = document.createElement('div');
-    swatch.className = 'color-swatch';
-    swatch.style.backgroundColor = color;
-    swatch.addEventListener('click', () => {
-        currentColor = color;
-        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-        swatch.classList.add('selected');
+let availableGirls = [];
+let currentScore = 0;
+let currentQuestionIndex = 0;
+let totalQuestions = 0;
+let timer;
+const timePerQuestion = 10; // 10 seconds per question
+let totalTimeUsed = 0;
+
+async function initAvailableGirls() {
+    availableGirls = [...girls]; // Include all girls
+    availableGirls = shuffleArray(availableGirls);
+
+    totalQuestions = availableGirls.length;
+    updateTotalGirls();
+    if (totalQuestions > 0) {
+        loadGame();
+    } else {
+        document.getElementById('game-container').innerHTML = '<p>No images available. Please add some images and try again.</p>';
+    }
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function updateTotalGirls() {
+    document.getElementById('total-girls').textContent = totalQuestions;
+}
+
+function updateScore() {
+    document.getElementById('current-score').textContent = currentScore;
+    document.getElementById('total-questions').textContent = currentQuestionIndex;
+    document.getElementById('total-time').textContent = `Total time used: ${totalTimeUsed} seconds`;
+}
+
+function updateProgress() {
+    document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+    const progressPercentage = (currentQuestionIndex / totalQuestions) * 100;
+    document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+}
+
+function loadGame() {
+    updateProgress();
+    const currentGirl = availableGirls[currentQuestionIndex];
+
+    const imgElement = document.getElementById('girl-photo');
+    imgElement.src = currentGirl.photo;
+
+    const options = [currentGirl.name];
+
+    while (options.length < 4) {
+        const randomGirl = availableGirls[Math.floor(Math.random() * availableGirls.length)];
+        if (!options.includes(randomGirl.name)) {
+            options.push(randomGirl.name);
+        }
+    }
+
+    options.sort(() => Math.random() - 0.5);
+
+    const nameOptionsDiv = document.getElementById('name-options');
+    nameOptionsDiv.innerHTML = '';
+
+    options.forEach(name => {
+        const button = document.createElement('button');
+        button.textContent = name;
+        button.onclick = () => checkAnswer(name, currentGirl.name);
+        nameOptionsDiv.appendChild(button);
     });
-    colorPalette.appendChild(swatch);
-});
 
-colorAdjust.addEventListener('input', () => {
-    const rgb = hexToRgb(currentColor);
-    const factor = colorAdjust.value / 50;
-    const adjustedRgb = rgb.map(value => Math.min(255, Math.max(0, Math.round(value * factor))));
-    currentColor = rgbToHex(adjustedRgb);
-    document.querySelector('.color-swatch.selected').style.backgroundColor = currentColor;
-});
-
-function hexToRgb(hex) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return [r, g, b];
+    startTimer();
 }
 
-function rgbToHex(rgb) {
-    return '#' + rgb.map(x => {
-        const hex = x.toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-    }).join('');
+function startTimer() {
+    let timeLeft = timePerQuestion;
+    document.getElementById('time-left').textContent = timeLeft;
+    clearInterval(timer); // Clear any existing timer
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('time-left').textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            totalTimeUsed += timePerQuestion;
+            showCorrectAnswer();
+            setTimeout(nextQuestion, 1500); // Move to the next question after 1.5 seconds
+        }
+    }, 1000);
 }
 
-let isDrawing = false;
-let lastX = 0;
-let lastY = 0;
-
-canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mouseout', stopDrawing);
-
-clearCanvas.addEventListener('click', () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-});
-
-function startDrawing(e) {
-    isDrawing = true;
-    [lastX, lastY] = [e.offsetX, e.offsetY];
+function showCorrectAnswer() {
+    const currentGirl = availableGirls[currentQuestionIndex];
+    const buttons = document.querySelectorAll('#name-options button');
+    buttons.forEach(button => {
+        button.disabled = true;
+        if (button.textContent === currentGirl.name) {
+            button.style.backgroundColor = '#4CAF50';
+        }
+    });
+    setTimeout(nextQuestion, 1500); // Move to the next question after 1.5 seconds
 }
 
-function draw(e) {
-    if (!isDrawing) return;
+function checkAnswer(selectedName, correctName) {
+    clearInterval(timer);
+    const timeUsed = timePerQuestion - parseInt(document.getElementById('time-left').textContent);
+    totalTimeUsed += timeUsed;
 
-    ctx.strokeStyle = currentColor;
-    ctx.fillStyle = currentColor;
-    ctx.lineWidth = strokeWidth.value;
-    ctx.lineCap = 'round';
+    const buttons = document.querySelectorAll('#name-options button');
+    buttons.forEach(button => {
+        button.disabled = true;
+        if (button.textContent === correctName) {
+            button.style.backgroundColor = '#4CAF50';
+        }
+    });
 
-    const shape = shapeSelector.value;
+    if (selectedName === correctName) {
+        currentScore++;
+    } else {
+        const selectedButton = Array.from(buttons).find(button => button.textContent === selectedName);
+        selectedButton.style.backgroundColor = '#f44336';
+    }
 
-    switch (shape) {
-        case 'freehand':
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
-            [lastX, lastY] = [e.offsetX, e.offsetY];
-            break;
-        case 'line':
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
-            break;
-        case 'rectangle':
-            ctx.strokeRect(lastX, lastY, e.offsetX - lastX, e.offsetY - lastY);
-            break;
-        case 'circle':
-            const radius = Math.sqrt(Math.pow(e.offsetX - lastX, 2) + Math.pow(e.offsetY - lastY, 2));
-            ctx.beginPath();
-            ctx.arc(lastX, lastY, radius, 0, 2 * Math.PI);
-            ctx.stroke();
-            break;
+    updateScore();
+    setTimeout(nextQuestion, 1500); // Move to the next question after 1.5 seconds
+}
+
+function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < totalQuestions) {
+        loadGame();
+    } else {
+        endGame();
     }
 }
 
-function stopDrawing() {
-    isDrawing = false;
-}
-
-textInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        ctx.font = `${fontSize.value}px ${fontFamily.value}`;
-        ctx.fillStyle = currentColor;
-        ctx.fillText(textInput.value, lastX, lastY);
-        textInput.value = '';
-    }
-});
-
-// Chatbot
-const chatMessages = document.getElementById('chat-messages');
-const userInput = document.getElementById('user-input');
-const sendMessage = document.getElementById('send-message');
-
-sendMessage.addEventListener('click', handleUserMessage);
-userInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        handleUserMessage();
-    }
-});
-
-function handleUserMessage() {
-    const message = userInput.value.trim();
-    if (message) {
-        addMessageToChat('User', message);
-        userInput.value = '';
-        setTimeout(() => {
-            const response = getJacJacResponse(message);
-            addMessageToChat('Jac Jac', response);
-        }, 1000);
+function getPerformanceComment(percentage) {
+    if (percentage >= 90) {
+        return "Excellent! You remember most of the girls' names. You're a true class expert!";
+    } else if (percentage >= 80) {
+        return "Great job! You have a very good memory of the girls in your class.";
+    } else if (percentage >= 70) {
+        return "Good work! You remember quite a few of the girls' names.";
+    } else if (percentage >= 60) {
+        return "Not bad! You're familiar with many of the girls in your class.";
+    } else if (percentage >= 50) {
+        return "You're getting there! Keep practicing to improve your memory of the class.";
+    } else {
+        return "There's room for improvement. Don't worry, with more practice you'll get better at remembering names!";
     }
 }
 
-function addMessageToChat(sender, message) {
-    const messageElement = document.createElement('p');
-    messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
-    chatMessages.appendChild(messageElement);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+function endGame() {
+    const percentage = (currentScore / totalQuestions) * 100;
+    const comment = getPerformanceComment(percentage);
+    const gameContainer = document.getElementById('game-container');
+    gameContainer.innerHTML = `
+        <h1>Quiz Completed!</h1>
+        <p>Your final score: ${currentScore} / ${totalQuestions}</p>
+        <p>Total time used: ${totalTimeUsed} seconds</p>
+        <p>${comment}</p>
+        <button onclick="restartGame()">Play Again</button>
+    `;
 }
 
-function getJacJacResponse(message) {
-    // This is a simple response system. You can expand this to make it more intelligent.
-    const responses = [
-        "That's interesting! I love learning new things.",
-        "Wow, I never thought about it that way!",
-        "Did you know that I love programming? It's so much fun!",
-        "I'm only 6, but I think that's a great idea!",
-        "Hong Kong is such an amazing place to live and learn!",
-        "I'd love to hear more about that. Can you tell me more?",
-        "That reminds me of a cool coding project I did recently!",
-        "I'm always excited to try new things. What do you like to do?",
-        "Learning is my favorite thing to do. What have you learned recently?",
-        "That's so cool! I can't wait to tell my friends about it!"
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+function restartGame() {
+    currentScore = 0;
+    currentQuestionIndex = 0;
+    totalTimeUsed = 0;
+    availableGirls = shuffleArray([...girls]); // Shuffle all girls for a fresh start
+    updateScore();
+    loadGame();
 }
+
+initAvailable
