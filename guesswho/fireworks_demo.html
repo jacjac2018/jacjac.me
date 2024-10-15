@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fireworks Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        #fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .firework {
+            position: absolute;
+            bottom: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: firework 2s ease-out infinite;
+        }
+
+        @keyframes firework {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(0);
+                opacity: 0;
+            }
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="fireworks"></div>
+    <div id="controls">
+        <button onclick="createFireworks()">Create Fireworks</button>
+    </div>
+
+    <script>
+        function createFireworks() {
+            const fireworks = document.getElementById('fireworks');
+            fireworks.innerHTML = ''; // Clear existing fireworks
+            
+            for (let i = 0; i < 50; i++) {
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                firework.style.left = `${Math.random() * 100}%`;
+                firework.style.animationDelay = `${Math.random() * 2}s`;
+                firework.style.backgroundColor = getRandomColor();
+                fireworks.appendChild(firework);
+            }
+        }
+
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Create initial fireworks
+        createFireworks();
+    </script>
+</body>
+</html>
