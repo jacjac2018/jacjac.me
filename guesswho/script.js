@@ -37,6 +37,7 @@ let girls = [
     { "name": "Yip Pui Lam", "photo": "Images/36.jpg" }
 ];
 
+
 let availableGirls = [];
 let currentScore = 0;
 let currentQuestionIndex = 0;
@@ -46,8 +47,13 @@ const timePerQuestion = 10000; // 10 seconds per question in milliseconds
 let totalTimeUsed = 0;
 let wrongAnswers = [];
 
+// At the beginning of the file, after the girls array is defined
+// const debugMode = false; // Add this line
+// const girlsToUse = debugMode ? girls.slice(0, 5) : girls; // Add this line
+
 function initAvailableGirls() {
-    availableGirls = [...girls]; // Include all girls
+    // Use all girls
+    availableGirls = [...girls];
     availableGirls = shuffleArray(availableGirls);
 
     totalQuestions = availableGirls.length;
@@ -58,6 +64,7 @@ function initAvailableGirls() {
         document.getElementById('game-container').innerHTML = '<p>No images available. Please add some images and try again.</p>';
     }
 }
+
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -84,7 +91,6 @@ function updateProgress() {
 }
 
 function loadGame() {
-    wrongAnswers = []; // Reset wrongAnswers at the start of each game
     updateProgress();
     const currentGirl = availableGirls[currentQuestionIndex];
 
@@ -123,7 +129,7 @@ function startTimer() {
     updateTimerDisplay(timeLeft);
     
     timer = setInterval(() => {
-        timeLeft -= 10; // Decrease by 10 milliseconds
+        timeLeft -= 100; // Decrease by 100 milliseconds instead of 10
         updateTimerDisplay(timeLeft);
         
         if (timeLeft <= 0) {
@@ -132,7 +138,7 @@ function startTimer() {
             showCorrectAnswer();
             setTimeout(nextQuestion, 1500);
         }
-    }, 10); // Update every 10 milliseconds
+    }, 100); // Update every 100 milliseconds instead of 10
 }
 
 function updateTimerDisplay(timeLeft) {
@@ -176,6 +182,8 @@ function checkAnswer(selectedName, correctName) {
             selected: selectedName,
             photo: availableGirls[currentQuestionIndex].photo
         });
+        console.log("Added wrong answer:", wrongAnswers[wrongAnswers.length - 1]); // Debug log
+        console.log("Current wrong answers:", wrongAnswers); // Debug log
     }
 
     updateScore();
@@ -221,7 +229,7 @@ function endGame() {
     
     let reviewButton = '';
     if (wrongAnswers.length > 0) {
-        reviewButton = '<button onclick="reviewWrongAnswers()" style="background-color: #FFA500; margin-right: 10px;">Review Wrong Answers</button>';
+        reviewButton = '<button onclick="startReview()" class="review-button" style="background-color: #FFA500; margin-right: 10px;">Review Wrong Answers</button>';
     }
     
     gameContainer.innerHTML = `
@@ -231,67 +239,124 @@ function endGame() {
         <p>Total time used: ${(totalTimeUsed / 1000).toFixed(2)} seconds</p>
         <p>${comment}</p>
         ${reviewButton}
-        <button onclick="restartGame()" style="background-color: #4CAF50;">Play Again</button>
+        <button onclick="restartGame()" class="play-again-button" style="background-color: #4CAF50;">Play Again</button>
     `;
     
     if (percentage === 100) {
         createFireworks();
     }
+
+    console.log("Wrong Answers at end of game:", wrongAnswers); // Debug log
 }
 
 function createFireworks() {
     const fireworks = document.getElementById('fireworks');
-    for (let i = 0; i < 50; i++) {
+    fireworks.innerHTML = ''; // Clear existing fireworks
+    for (let i = 0; i < 20; i++) { // Reduced from 50 to 20
         const firework = document.createElement('div');
         firework.className = 'firework';
         firework.style.left = `${Math.random() * 100}%`;
-        firework.style.animationDelay = `${Math.random() * 2}s`;
+        firework.style.top = `${Math.random() * 100}%`;
+        firework.style.setProperty('--x', `${(Math.random() - 0.5) * 200}px`);
+        firework.style.setProperty('--y', `${(Math.random() - 0.5) * 200}px`);
+        firework.style.animationDuration = `${1 + Math.random()}s`; // Shorter duration
         fireworks.appendChild(firework);
     }
+    // Remove fireworks after 3 seconds
+    setTimeout(() => {
+        fireworks.innerHTML = '';
+    }, 3000);
 }
 
-function reviewWrongAnswers() {
+function startReview() {
+    console.log("Starting review. Wrong Answers:", wrongAnswers); // Debug log
     if (wrongAnswers.length === 0) {
-        alert("Congratulations! You didn't get any answers wrong.");
+        alert("No wrong answers to review.");
         return;
     }
 
-    showAllWrongAnswers();
+    currentQuestionIndex = 0;
+    loadReviewQuestion();
 }
 
-function showAllWrongAnswers() {
+function loadReviewQuestion() {
+    console.log("Loading review question", currentQuestionIndex + 1, "of", wrongAnswers.length); // Debug log
+    if (currentQuestionIndex >= wrongAnswers.length) {
+        endReview();
+        return;
+    }
+
+    const currentWrong = wrongAnswers[currentQuestionIndex];
     const gameContainer = document.getElementById('game-container');
     
-    let wrongAnswersHTML = '<h2>Review Wrong Answers</h2>';
-    wrongAnswers.forEach((wrong, index) => {
-        wrongAnswersHTML += `
-            <div class="review-item">
-                <img src="${wrong.photo}" alt="${wrong.correct}" style="width: 100px; height: 100px; object-fit: cover;">
-                <div>
-                    <p>Question ${index + 1}</p>
-                    <p>Correct answer: ${wrong.correct}</p>
-                    <p>Your answer: ${wrong.selected}</p>
-                </div>
-            </div>
-        `;
-    });
-
-    wrongAnswersHTML += `
-        <button onclick="restartGame()" style="background-color: #4CAF50;">Play Again</button>
+    gameContainer.innerHTML = `
+        <h1>Review Wrong Answers</h1>
+        <div id="progress">Question <span id="current-question">${currentQuestionIndex + 1}</span> of <span id="total-girls">${wrongAnswers.length}</span></div>
+        <img id="girl-photo" src="${currentWrong.photo}" alt="Girl's Photo">
+        <div id="name-options"></div>
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
     `;
 
-    gameContainer.innerHTML = wrongAnswersHTML;
+    const options = [currentWrong.correct, currentWrong.selected];
+    while (options.length < 4) {
+        const randomGirl = girls[Math.floor(Math.random() * girls.length)];
+        if (!options.includes(randomGirl.name)) {
+            options.push(randomGirl.name);
+        }
+    }
+    options.sort(() => Math.random() - 0.5);
+
+    const nameOptionsDiv = document.getElementById('name-options');
+    options.forEach(name => {
+        const button = document.createElement('button');
+        button.textContent = name;
+        button.onclick = () => checkReviewAnswer(name, currentWrong.correct, currentWrong.selected);
+        nameOptionsDiv.appendChild(button);
+    });
+
+    updateReviewProgress();
+}
+
+function checkReviewAnswer(selectedName, correctName, originallySelected) {
+    const buttons = document.querySelectorAll('#name-options button');
+    buttons.forEach(button => {
+        button.disabled = true;
+        if (button.textContent === correctName) {
+            button.style.backgroundColor = '#4CAF50'; // Green for correct answer
+        } else if (button.textContent === originallySelected) {
+            button.style.backgroundColor = '#f44336'; // Red for originally selected wrong answer
+        }
+    });
+
+    setTimeout(() => {
+        currentQuestionIndex++;
+        loadReviewQuestion();
+    }, 1500);
+}
+
+function updateReviewProgress() {
+    const progressPercentage = ((currentQuestionIndex + 1) / wrongAnswers.length) * 100;
+    document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+}
+
+function endReview() {
+    const gameContainer = document.getElementById('game-container');
+    gameContainer.innerHTML = `
+        <h1>Review Completed</h1>
+        <p>You've reviewed all the questions you answered incorrectly.</p>
+        <button onclick="restartGame()" style="background-color: #4CAF50;">Play Again</button>
+    `;
 }
 
 function restartGame() {
+    clearGameContainer(); // Clear the game container first
     currentScore = 0;
     currentQuestionIndex = 0;
     totalTimeUsed = 0;
-    wrongAnswers = []; // Reset wrongAnswers
-    availableGirls = shuffleArray([...girls]); // Shuffle all girls for a fresh start
-    totalQuestions = availableGirls.length;
-    updateScore();
-    
+    wrongAnswers = []; // Reset wrong answers
+
     // Reset the game container to its initial state
     const gameContainer = document.getElementById('game-container');
     gameContainer.innerHTML = `
@@ -308,8 +373,15 @@ function restartGame() {
         <div id="timer">Time: <span id="time-left">10</span>s</div>
     `;
     
-    updateTotalGirls();
+    // Re-initialize available girls and start a new game
+    initAvailableGirls();
+    updateScore();
     loadGame();
+}
+
+function clearGameContainer() {
+    const gameContainer = document.getElementById('game-container');
+    gameContainer.innerHTML = '';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
